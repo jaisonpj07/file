@@ -1,9 +1,14 @@
 const multer = require("multer");
 const fileUploader = require("../Models/filesave");
+const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    const uploadDir = 'uploads/';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname);
@@ -35,7 +40,7 @@ module.exports.fileUpload = async (req, res) => {
     });
 
     if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      return res.status(400).json({ error: "No file uploaded or upload failed" });
     } else {
       const fileName = req.file.filename;
       const filePath = req.file.path;
